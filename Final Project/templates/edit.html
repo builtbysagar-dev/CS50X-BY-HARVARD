@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Edit Subscription
+{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4">
+            <h2 class="text-center mb-4">Edit Subscription</h2>
+            <form action="/edit/{{ sub.id }}" method="post">
+                <div class="form-floating mb-3">
+                    <input autocomplete="off" autofocus class="form-control" id="name" name="name" placeholder="Name"
+                        type="text" value="{{ sub.name }}" required>
+                    <label for="name">Subscription Name</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="cost" name="cost" placeholder="Cost" type="number" step="0.01"
+                        min="0.01" value="{{ sub.cost }}" required>
+                    <label for="cost">Cost ($)</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="billing_cycle" name="billing_cycle" required>
+                        <option value="Weekly" {% if sub.billing_cycle=='Weekly' %}selected{% endif %}>Weekly</option>
+                        <option value="Monthly" {% if sub.billing_cycle=='Monthly' or not sub.billing_cycle %}selected{%
+                            endif %}>Monthly</option>
+                        <option value="Quarterly" {% if sub.billing_cycle=='Quarterly' %}selected{% endif %}>Quarterly
+                        </option>
+                        <option value="Annually" {% if sub.billing_cycle=='Annually' %}selected{% endif %}>Annually
+                        </option>
+                    </select>
+                    <label for="billing_cycle">Billing Cycle</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="category" name="category" required>
+                        <option disabled value="">Choose...</option>
+                        <option value="Entertainment" {% if sub.category=='Entertainment' %}selected{% endif %}>
+                            Entertainment</option>
+                        <option value="Productivity" {% if sub.category=='Productivity' %}selected{% endif %}>
+                            Productivity</option>
+                        <option value="Utilities" {% if sub.category=='Utilities' %}selected{% endif %}>Utilities
+                        </option>
+                        <option value="Other" {% if sub.category=='Other' %}selected{% endif %}>Other</option>
+                    </select>
+                    <label for="category">Category</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="renewal_date" name="renewal_date" type="date"
+                        value="{{ sub.renewal_date }}" required>
+                    <label for="renewal_date">Next Renewal Date</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input class="form-control" id="cancel_url" name="cancel_url" placeholder="URL" type="url"
+                        value="{{ sub.cancel_url }}">
+                    <label for="cancel_url">Cancellation URL (Optional)</label>
+                </div>
+
+                <button class="btn btn-primary w-100" type="submit">Save Changes</button>
+                <a href="/" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

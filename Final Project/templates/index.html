@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block main %}
+<!-- Top Section: Budgets -->
+<div class="row mb-5">
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Entertainment Budget</h5>
+                <h2 class="mb-3">{{ ent_spent | usd }} <span class="fs-6 text-muted">/ {{ ent_budget | usd }}</span>
+                </h2>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar {% if ent_percent > 100 %}bg-danger{% else %}bg-info{% endif %}"
+                        role="progressbar" style="width: {{ ent_percent }}%;" aria-valuenow="{{ ent_percent }}"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted mt-2 d-block">{{ ent_percent | round(1) }}% Used</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Productivity Budget</h5>
+                <h2 class="mb-3">{{ prod_spent | usd }} <span class="fs-6 text-muted">/ {{ prod_budget | usd }}</span>
+                </h2>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar {% if prod_percent > 100 %}bg-danger{% else %}bg-success{% endif %}"
+                        role="progressbar" style="width: {{ prod_percent }}%;" aria-valuenow="{{ prod_percent }}"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted mt-2 d-block">{{ prod_percent | round(1) }}% Used</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Middle Section: Chart -->
+<div class="row mb-5 justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4">Spending Distribution</h5>
+                <canvas id="spendingChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Section: Subscriptions -->
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Your Subscriptions</h3>
+            <a href="/add" class="btn btn-primary"><i class="fa-solid fa-plus me-2"></i>Add New</a>
+        </div>
+
+        {% if subs %}
+        <div class="row">
+            {% for sub in subs %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">{{ sub.name }}</h5>
+                            <span class="badge rounded-pill 
+                                            {% if sub.category == 'Entertainment' %}badge-entertainment
+                                            {% elif sub.category == 'Productivity' %}badge-productivity
+                                            {% elif sub.category == 'Utilities' %}badge-utilities
+                                            {% else %}badge-other{% endif %}">
+                                {{ sub.category }}
+                            </span>
+                        </div>
+                        {% if sub.billing_cycle == 'Weekly' %}
+                        <h3 class="card-text text-primary">{{ sub.cost | usd }}<small class="text-muted fs-6">/week</small></h3>
+                        <p class="text-muted mb-0"><small>≈ {{ sub.monthly_cost | usd }}/month</small></p>
+                        {% elif sub.billing_cycle == 'Quarterly' %}
+                        <h3 class="card-text text-primary">{{ sub.cost | usd }}<small class="text-muted fs-6">/quarter</small></h3>
+                        <p class="text-muted mb-0"><small>≈ {{ sub.monthly_cost | usd }}/month</small></p>
+                        {% elif sub.billing_cycle == 'Annually' %}
+                        <h3 class="card-text text-primary">{{ sub.cost | usd }}<small class="text-muted fs-6">/year</small></h3>
+                        <p class="text-muted mb-0"><small>≈ {{ sub.monthly_cost | usd }}/month</small></p>
+                        {% else %}
+                        <h3 class="card-text text-primary">{{ sub.cost | usd }}<small class="text-muted fs-6">/month</small></h3>
+                        {% endif %}
+
+                        <div class="mt-3">
+                            <p class="mb-1 text-muted"><small>Renews: {{ sub.renewal_date }}</small></p>
+                            <p
+                                class="mb-3 
+                                            {% if sub.days_remaining <= 3 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                                <i class="fa-regular fa-clock me-1"></i>
+                                {% if sub.days_remaining == 0 %}
+                                Renews Today!
+                                {% else %}
+                                {{ sub.days_remaining }} days left
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
+                            {% if sub.cancel_url %}
+                            <a href="{{ sub.cancel_url }}" target="_blank"
+                                class="btn btn-outline-light btn-sm flex-grow-1">
+                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Cancel
+                            </a>
+                            {% endif %}
+                            <a href="/edit/{{ sub.id }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <form action="/delete/{{ sub.id }}" method="post"
+                                onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-secondary text-center">
+            No subscriptions found. <a href="/add">Add one now!</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('spendingChart').getContext('2d');
+        const entSpent = {{ ent_spent }};
+    const prodSpent = {{ prod_spent }};
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Entertainment', 'Productivity'],
+            datasets: [{
+                data: [entSpent, prodSpent],
+                backgroundColor: [
+                    '#dc3545', // Red
+                    '#0d6efd'  // Blue
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#e0e0e0'
+                    }
+                }
+            }
+        }
+    });
+        });
+</script>
+{% endblock %}
