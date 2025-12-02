@@ -1,0 +1,11 @@
+sort1 uses: Bubble Sort
+
+How do you know?: The program runs significantly faster on the already sorted list (0.064s) compared to the unsorted list (0.157s). This huge performance jump suggests an algorithm with a Best Case time complexity of O(n), where it can exit early if no swaps are needed. This is characteristic of Bubble Sort.
+
+sort2 uses: Merge Sort
+
+How do you know?: This program is the fastest of the three on the unsorted list (0.079s), suggesting a more efficient time complexity like O(n log n). Furthermore, the runtime is consistent; it takes roughly the same amount of time for sorted (0.091s) and unsorted data, which is a hallmark of Merge Sort (which always divides and conquers regardless of order).
+
+sort3 uses: Selection Sort
+
+How do you know?: The runtime is nearly identical for the unsorted list (0.171s) and the sorted list (0.169s). It does not get faster even when the data is already in order. This inefficiency indicates an O(n^2) algorithm that must scan the remaining portion of the array to find the minimum element every single time, regardless of the current order.

@@ -1,0 +1,3 @@
+Spotify can use the 'energy', 'danceability', and 'valence' data to characterize a listener's habits for campaigns like Spotify Wrapped.
+
+For example, by calculating the average energy and valence of the songs a user streamed the most, Spotify can identify the user's "Audio Aura" (e.g., "Wistful & Euphoric" or "Confident & Bold"). If a user listens to songs with high danceability and tempo, Spotify might categorize them as a "Party Starter." This data allows Spotify to visualize the "mood" of a user's year in music.
